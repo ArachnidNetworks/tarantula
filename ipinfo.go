@@ -10,23 +10,23 @@ import (
 )
 
 type IP struct {
-  Address   string `json:"ip"`
-  Hostname  string `json:"hostname"`
+	Address  string `json:"ip"`
+	Hostname string `json:"hostname"`
 
-  City      string `json:"city"`
-  Region    string `json:"region"`
-  Country   string `json:"country"`
+	City    string `json:"city"`
+	Region  string `json:"region"`
+	Country string `json:"country"`
 
-  Loc       string `json:"loc"`
-  Org       string `json:"org"`
+	Loc string `json:"loc"`
+	Org string `json:"org"`
 }
 
 func Lookup(address string) string {
-	spaceClient := http.Client {
-		Timeout: time.Second * 2, // 2 second timeout
+	spaceClient := http.Client{
+		Timeout: time.Second * 10, // 2 second timeout
 	}
 
-	req, err := http.NewRequest(http.MethodGet, "http://ipinfo.io/" + address, nil)
+	req, err := http.NewRequest(http.MethodGet, "http://ipinfo.io/"+address, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,12 +49,15 @@ func Lookup(address string) string {
 		log.Fatal(jsonErr)
 	}
 
-  return fmt.Sprintf(">*%s* _(%s)_\n>%s\n>%s %s %s %s", addr.Address,
-                                             addr.Hostname,
-																						 addr.Org,
-                                             addr.Loc,
-                                             addr.City,
-                                             addr.Region,
-                                             addr.Country)
-
+	if addr.Address != "" && addr.Org != "" {
+		return fmt.Sprintf(">*%s* _(%s)_\n>%s\n>%s %s %s %s", addr.Address,
+			addr.Hostname,
+			addr.Org,
+			addr.Loc,
+			addr.City,
+			addr.Region,
+			addr.Country)
+	} else {
+		return ">Invalid Address"
+	}
 }

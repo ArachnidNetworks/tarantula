@@ -12,14 +12,14 @@ import (
 var kbc *kbchat.API
 
 func fail(msg string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, msg+"\n", args...)
+	_, _ = fmt.Fprintf(os.Stderr, msg+"\n", args...)
 	os.Exit(3)
 }
 
 func send(channel kbchat.Channel, body string) {
-  if _, err := kbc.SendMessage(channel, body); err != nil {
-    fail("error echo'ing message: %s", err.Error())
-  }
+	if _, err := kbc.SendMessage(channel, body); err != nil {
+		fail("error echo'ing message: %s", err.Error())
+	}
 }
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 		fail("Error creating API: %s", err.Error())
 	}
 
-  sub, err := kbc.ListenForNewTextMessages()
+	sub, err := kbc.ListenForNewTextMessages()
 	if err != nil {
 		fail("Error listening: %s", err.Error())
 	}
@@ -51,11 +51,21 @@ func main() {
 		}
 
 		args := strings.Split(msg.Message.Content.Text.Body, " ")
-    switch body := args[0]; body {
-  	case "!ping":
-      send(msg.Message.Channel, "Pong")
+		switch body := args[0]; body {
+		case "!ping":
+			send(msg.Message.Channel, "Pong")
 		case "!lookup":
-			send(msg.Message.Channel, Lookup(args[1]))
-  	}
+			if len(args) != 2 {
+				send(msg.Message.Channel, ">Usage: !lookup 127.0.0.1")
+			} else {
+				send(msg.Message.Channel, Lookup(args[1]))
+			}
+		case "!dig":
+			if len(args) != 2 {
+				send(msg.Message.Channel, ">Usage: !dns example.com")
+			} else {
+				send(msg.Message.Channel, DNS(args[1]))
+			}
+		}
 	}
 }
